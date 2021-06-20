@@ -1,0 +1,21 @@
+{
+  "name": "siren_poc_server",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "gremlin": "^3.5.0"
+  },
+  "devDependencies": {
+    "@types/gremlin": "^3.4.6",
+    "nodemon": "^2.0.7",
+    "ts-node": "^10.0.0",
+    "typescript": "^4.3.4"
+  }
+}
