@@ -11,10 +11,16 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "gremlin": "^3.5.0"
+    "express": "^4.17.1",
+    "gremlin": "^3.5.0",
+    "morgan": "^1.10.0",
+    "siren-writer": "^0.5.0"
   },
   "devDependencies": {
+    "@types/express": "^4.17.12",
     "@types/gremlin": "^3.4.6",
+    "@types/morgan": "^1.9.2",
+    "@types/node": "^15.12.4",
     "@typescript-eslint/eslint-plugin": "^4.27.0",
     "@typescript-eslint/parser": "^4.27.0",
     "eslint": "^7.29.0",

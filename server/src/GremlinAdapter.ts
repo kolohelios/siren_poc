@@ -22,8 +22,7 @@ export class GremlinAdapter {
 			config.authenticator = authenticator;
 		}
 
-		// withRemote specifies that this source is not local and should be considered
-		// a network resource
+		// withRemote specifies that this source is not local and should be considered a network resource
 		this.g = traversal().withRemote(
 			new driver.DriverRemoteConnection(
 				`ws://127.0.0.1:8182/gremlin`,
@@ -32,27 +31,77 @@ export class GremlinAdapter {
 		);
 	}
 
+	// Warning: mutator
+	private addProperties(
+		traversalProcess: process.GraphTraversal,
+		input: Record<string, string | number | boolean>,
+	): process.GraphTraversal {
+		for (const key in input) {
+			if (input.hasOwnProperty(key)) {
+				if (typeof input[key] === 'object') {
+					traversalProcess = traversalProcess.property(
+						key,
+						JSON.stringify(input[key]),
+					);
+					continue;
+				}
+
+				traversalProcess = traversalProcess.property(
+					key,
+					`${input[key]}`,
+				);
+			}
+		}
+
+		return traversalProcess;
+	}
+
 	public async addGenericVertex(
 		type: string,
-		input: any,
+		input: Record<string, string | number | boolean>,
 	): Promise<structure.Vertex> {
 		let write = this.g.addV(type);
 		console.log({ type, input });
 
-		for (const key in input) {
-			if (input.hasOwnProperty(key)) {
-				if (typeof input[key] === 'object') {
-					write = write.property(key, JSON.stringify(input[key]));
-					continue;
-				}
-
-				write = write.property(key, `${input[key]}`);
-				console.log({ write });
-			}
-		}
+		write = this.addProperties(write, input);
 
 		return new Promise((resolve, reject) => {
 			write
+				.toList()
+				.then((results) => {
+					console.log({ results });
+					const resultSet: driver.ResultSet = new driver.ResultSet(
+						results,
+					);
+
+					console.log({ resultSet });
+
+					const created: structure.Vertex = <structure.Vertex>(
+						(<unknown>resultSet.first())
+					);
+					resolve(created);
+				})
+				.catch((err) => {
+					reject(err);
+					console.error({ err });
+				});
+		});
+	}
+
+	public async addGenericEdge(
+		type: string,
+		input: any,
+		from: number,
+		to: number,
+	): Promise<structure.Edge> {
+		let write = this.g.addE(type);
+
+		write = this.addProperties(write, input);
+
+		return new Promise((resolve, reject) => {
+			write
+				.from_(from)
+				.to(to)
 				.toList()
 				.then((results) => {
 					console.log({ results });
@@ -78,8 +127,15 @@ export class GremlinAdapter {
 export interface GraphAdapter {
 	addGenericVertex(
 		type: string,
-		input: any,
+		input: Record<string, string | number | boolean>,
 	): Promise<structure.Vertex>;
+
+	addGenericEdge(
+		type: string,
+		input: Record<string, string | number | boolean>,
+		from: number,
+		to: number,
+	): Promise<structure.Edge>;
 }
 
 export interface Vertex {
